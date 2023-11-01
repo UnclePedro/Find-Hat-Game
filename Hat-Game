@@ -1,0 +1,123 @@
+const prompt = require("prompt-sync")({ sigint: true });
+
+// Playing field characters
+const hat = "^";
+const hole = "O";
+const fieldCharacter = "░";
+const pathCharacter = "*";
+
+// Class to construct a playing field with method to print field
+class Field {
+  constructor(fieldArr) {
+    this.fieldArr = fieldArr;
+    this.locationX = 0;
+    this.locationY = 0;
+    // Set the "home" position before the game starts
+    this.fieldArr[0][0] = pathCharacter;
+  }
+
+  // Prints the field array to console without array bracket and commas
+  print() {
+    for (let i = 0; i < this.fieldArr.length; i++) {
+      console.log(this.fieldArr[i].join(""));
+    }
+  }
+
+  // A method to initiate the game
+  runGame() {
+    let playing = true;
+    while (playing) {
+      this.print();
+      this.promptMove();
+      if (!this.isInBounds()) {
+        console.log("Whoops, you went out of bounds.");
+        playing = false;
+        break;
+      } else if (this.isHole()) {
+        console.log("You fell down a hole and lost your hat forever.");
+        playing = false;
+        break;
+      } else if (this.isHat()) {
+        console.log("You found your hat!");
+        playing = false;
+        break;
+      }
+      /* Updates the pathCharacter location on the map. This is applying the locationX and locationY indexes that are changed by promptMove directly to pathCharacter, 
+        hence moving pathCharacter to that index.*/
+      this.fieldArr[this.locationY][this.locationX] = pathCharacter;
+    }
+  }
+
+  promptMove() {
+    const question = prompt("Make a move. ");
+    switch (question) {
+      case "w":
+        this.locationY -= 1;
+        break;
+      case "a":
+        this.locationX -= 1;
+        break;
+      case "s":
+        this.locationY += 1;
+        break;
+      case "d":
+        this.locationX += 1;
+        break;
+      default:
+        console.log("Press W, A, S or D.");
+        this.promptMove();
+        break;
+    }
+  }
+
+  isHat() {
+    // returns true if the players coordinates (x and y index) equal the same as a hat on the field array.
+    return this.fieldArr[this.locationY][this.locationX] === hat;
+  }
+
+  isHole() {
+    // returns true if the players coordinates (x and y index) equal the same as a hole on the field array.
+    return this.fieldArr[this.locationY][this.locationX] === hole;
+  }
+
+  isInBounds() {
+    return (
+      this.locationY >= 0 &&
+      this.locationX >= 0 &&
+      this.locationY < this.fieldArr.length &&
+      this.locationX < this.fieldArr[0].length
+    );
+  }
+
+  static generateField(height, width, percentage = 0.1) {
+    const fieldArr = new Array(height).fill(0).map((el) => new Array(width));
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const prob = Math.random();
+        fieldArr[y][x] = prob > percentage ? fieldCharacter : hole;
+      }
+    }
+    // Set the "hat" location
+    const hatLocation = {
+      x: Math.floor(Math.random() * width),
+      y: Math.floor(Math.random() * height),
+    };
+    // Make sure the "hat" is not at the starting point
+    while (hatLocation.x === 0 && hatLocation.y === 0) {
+      hatLocation.x = Math.floor(Math.random() * width);
+      hatLocation.y = Math.floor(Math.random() * height);
+    }
+    fieldArr[hatLocation.y][hatLocation.x] = hat;
+    return fieldArr;
+  }
+}
+
+// New playing field
+const testField = new Field([
+  ["*", "░", "O"],
+  ["░", "O", "░"],
+  ["░", "^", "░"],
+]);
+
+const myfield = new Field(Field.generateField(10, 10, 0.2));
+myfield.runGame();
