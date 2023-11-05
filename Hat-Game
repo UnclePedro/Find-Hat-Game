@@ -173,5 +173,5 @@ const testField = new Field([
   ["░", "^", "░"],
 ])
 
-const myfield = new Field(Field.generateCompletableField(100, 100, 0.3))
+const myfield = new Field(Field.generateCompletableField(10, 10, 0.3))
 myfield.runGame()
